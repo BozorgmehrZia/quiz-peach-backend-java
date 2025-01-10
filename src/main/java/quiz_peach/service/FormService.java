@@ -1,7 +1,6 @@
 package quiz_peach.service;
 
 import quiz_peach.domain.dto.*;
-import quiz_peach.domain.entities.Form;
 import quiz_peach.exceptions.FormNotFoundException;
 import quiz_peach.mapper.FormMapper;
 import quiz_peach.repository.FormRepository;

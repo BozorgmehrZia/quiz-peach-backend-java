@@ -1,6 +1,5 @@
 package quiz_peach.repository;
 
-import quiz_peach.domain.entities.Form;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

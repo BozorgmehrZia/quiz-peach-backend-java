@@ -1,8 +1,6 @@
 package quiz_peach.mapper;
 
 import quiz_peach.domain.dto.*;
-import quiz_peach.domain.entities.Field;
-import quiz_peach.domain.entities.Form;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.factory.Mappers;
