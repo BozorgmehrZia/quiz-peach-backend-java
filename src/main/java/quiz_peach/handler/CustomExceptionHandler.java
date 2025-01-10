@@ -1,6 +1,6 @@
 package quiz_peach.handler;
 
-import quiz_peach.exceptions.FormNotFoundException;
+import quiz_peach.exceptions.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -9,10 +9,10 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.http.converter.HttpMessageNotReadableException;
 
 @ControllerAdvice
-public class FormBuilderExceptionHandler {
+public class CustomExceptionHandler {
 
-    @ExceptionHandler(FormNotFoundException.class)
-    public ResponseEntity<Object> handleFormatNotFoundException(FormNotFoundException ex) {
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<Object> handleFormatNotFoundException(ResourceNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ex.getMessage());
     }
