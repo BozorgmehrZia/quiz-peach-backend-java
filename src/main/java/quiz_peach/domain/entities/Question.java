@@ -11,14 +11,16 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Question {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "creator_id", nullable = false)
-    private Long creatorId;
+    @ManyToOne
+    @JoinColumn(name = "creator_id", nullable = false)
+    private User creator;
 
     @Column(nullable = false)
     private String name;
@@ -65,5 +67,13 @@ public class Question {
             inverseJoinColumns = @JoinColumn(name = "related_id")
     )
     private List<Question> relatedQuestions;
+
+    public void incrementCorrectAnswerCount() {
+        correctAnswerCount++;
+    }
+
+    public void incrementAnswerCount() {
+        answerCount++;
+    }
 }
 

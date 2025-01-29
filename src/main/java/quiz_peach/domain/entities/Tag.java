@@ -9,6 +9,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Tag {
 
     @Id
@@ -23,4 +24,8 @@ public class Tag {
 
     @OneToMany(mappedBy = "tag", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Question> questions;
+
+    public void incrementQuestionNumber() {
+        questionNumber++;
+    }
 }
