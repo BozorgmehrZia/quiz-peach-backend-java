@@ -1,3 +1,5 @@
 package quiz_peach.domain.dto;
 
-public record UserRequestDTO(String name, String email, String password) {}
+import jakarta.validation.constraints.NotNull;
+
+public record UserRequestDTO(@NotNull String name, @NotNull String email, @NotNull String password) {}

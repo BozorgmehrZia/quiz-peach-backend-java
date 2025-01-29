@@ -21,26 +21,23 @@ public class UserService {
     public List<UserResponseDTO> getUsers(String name, String sort) {
         List<User> users = userRepository.findByNameContainingIgnoreCaseOrderByScore(name, sort.equalsIgnoreCase("desc"));
         return users.stream()
-                .map(user -> new UserResponseDTO(user.getId(), user.getName(), user.getScore()))
-                .collect(Collectors.toList());
+                    .map(user -> new UserResponseDTO(user.getId(), user.getName(), user.getScore()))
+                    .collect(Collectors.toList());
     }
 
     public UserResponseDTO registerUser(UserRequestDTO userRequestDTO) {
-        if (userRequestDTO.name() == null || userRequestDTO.email() == null || userRequestDTO.password() == null) {
-            throw new RuntimeException("Name, email, and password are required.");
-        }
-
         if (userRepository.existsByNameOrEmail(userRequestDTO.name(), userRequestDTO.email())) {
             throw new RuntimeException("User with this name or email already exists.");
         }
 
-        User user = new User();
-        user.setName(userRequestDTO.name());
-        user.setEmail(userRequestDTO.email());
-        user.setPassword(passwordEncoder.encode(userRequestDTO.password()));
-        userRepository.save(user);
+        User user = User.builder()
+                        .name(userRequestDTO.name())
+                        .email(userRequestDTO.email())
+                        .password(passwordEncoder.encode(userRequestDTO.password()))
+                        .build();
+        final User createdUser = userRepository.save(user);
 
-        return new UserResponseDTO(user.getId(), user.getName(), user.getScore());
+        return new UserResponseDTO(createdUser.getId(), createdUser.getName(), createdUser.getScore());
     }
 
     public void loginUser(LoginRequestDTO loginRequestDTO) {
@@ -50,7 +47,7 @@ public class UserService {
         }
     }
 
-    public void logout() {
+    public void logout(final User user) {
 
     }
 }
