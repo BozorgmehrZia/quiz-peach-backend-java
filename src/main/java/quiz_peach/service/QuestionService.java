@@ -7,7 +7,6 @@ import quiz_peach.domain.dto.*;
 import quiz_peach.domain.entities.AnsweredQuestionUser;
 import quiz_peach.domain.entities.Question;
 import quiz_peach.domain.entities.Tag;
-import quiz_peach.domain.entities.User;
 import quiz_peach.domain.enumeration.AnsweredStatus;
 import quiz_peach.repository.AnsweredQuestionUserRepository;
 import quiz_peach.repository.QuestionRepository;
@@ -25,22 +24,22 @@ public class QuestionService {
     private final AnsweredQuestionUserRepository answeredQuestionUserRepository;
 
     @Transactional
-    public void createQuestion(CreateQuestionDTO dto, User user) {
+    public void createQuestion(CreateQuestionDTO dto, CurrentUser user) {
         Tag tag = tagRepository.findByName(dto.tagName())
-                               .orElseThrow(() -> new RuntimeException("Tag not found"));
+                .orElseThrow(() -> new RuntimeException("Tag not found"));
 
         Question question = Question.builder()
-                                    .creator(user)
-                                    .name(dto.name())
-                                    .question(dto.question())
-                                    .option1(dto.option1())
-                                    .option2(dto.option2())
-                                    .option3(dto.option3())
-                                    .option4(dto.option4())
-                                    .correctOption(dto.correctOption())
-                                    .level(dto.level())
-                                    .tag(tag)
-                                    .build();
+                .creator(user.getUser())
+                .name(dto.name())
+                .question(dto.question())
+                .option1(dto.option1())
+                .option2(dto.option2())
+                .option3(dto.option3())
+                .option4(dto.option4())
+                .correctOption(dto.correctOption())
+                .level(dto.level())
+                .tag(tag)
+                .build();
 
         tag.incrementQuestionNumber();
         tagRepository.save(tag);
@@ -52,34 +51,27 @@ public class QuestionService {
         questionRepository.save(question);
     }
 
-    public List<FilteredQuestionDTO> getFilteredQuestions(String name, String level, AnsweredStatus answeredStatus, User user) {
+    public List<FilteredQuestionDTO> getFilteredQuestions(String name, String level, AnsweredStatus answeredStatus, CurrentUser user) {
         List<Question> questions = questionRepository.findByFilters(name, level);
         return questions.stream()
-                        .filter(q -> answeredStatus == null || filterByAnsweredStatus(q, user.getId(), answeredStatus))
-                        .map(q -> new FilteredQuestionDTO(q.getId(), q.getName(), q.getLevel(), q.getTag().getName()))
-                        .collect(Collectors.toList());
+                .filter(q -> answeredStatus == null || filterByAnsweredStatus(q, user.getUser().getId(), answeredStatus))
+                .map(q -> new FilteredQuestionDTO(q.getId(), q.getName(), q.getLevel(), q.getTag().getName()))
+                .collect(Collectors.toList());
     }
 
-    private boolean filterByAnsweredStatus(Question question, Long userId, AnsweredStatus answeredStatus) {
-        return answeredQuestionUserRepository.findByQuestionIdAndUserId(question.getId(), userId)
-                                             .map(a -> a.getAnsweredStatus() == answeredStatus)
-                                             .orElse(false);
-    }
-
-
-    public QuestionDTO getQuestionDetails(Long id, User user) {
+    public QuestionDTO getQuestionDetails(Long id, CurrentUser user) {
         Question question = questionRepository.findById(id)
-                                              .orElseThrow(() -> new RuntimeException("Question not found"));
+                .orElseThrow(() -> new RuntimeException("Question not found"));
 
-        boolean answered = answeredQuestionUserRepository.existsByUserIdAndQuestionId(user.getId(), id);
+        boolean answered = answeredQuestionUserRepository.existsByUserIdAndQuestionId(user.getUser().getId(), id);
 
         return getQuestionDTO(question, answered);
     }
 
     @Transactional
-    public AnswerQuestionResponseDTO submitAnswer(AnswerQuestionRequestDTO dto, User user) {
+    public AnswerQuestionResponseDTO submitAnswer(AnswerQuestionRequestDTO dto, CurrentUser user) {
         Question question = questionRepository.findById(dto.questionId())
-                                              .orElseThrow(() -> new RuntimeException("Question not found"));
+                .orElseThrow(() -> new RuntimeException("Question not found"));
 
         if (dto.option() > 4 || dto.option() < 1) {
             throw new RuntimeException("Option must be an integer between 1 and 4.");
@@ -87,11 +79,11 @@ public class QuestionService {
         boolean isCorrect = Objects.equals(question.getCorrectOption(), dto.option());
         AnsweredStatus answeredStatus = isCorrect ? AnsweredStatus.CORRECT : AnsweredStatus.INCORRECT;
 
-        if (answeredQuestionUserRepository.existsByUserIdAndQuestionId(user.getId(), dto.questionId())) {
+        if (answeredQuestionUserRepository.existsByUserIdAndQuestionId(user.getUser().getId(), dto.questionId())) {
             throw new RuntimeException("You have already answered this question.");
         }
 
-        AnsweredQuestionUser answeredQuestionUser = new AnsweredQuestionUser(question, user, answeredStatus);
+        AnsweredQuestionUser answeredQuestionUser = new AnsweredQuestionUser(question, user.getUser(), answeredStatus);
         answeredQuestionUserRepository.save(answeredQuestionUser);
 
         if (isCorrect) {
@@ -104,11 +96,17 @@ public class QuestionService {
 
     public List<QuestionDTO> getSimilarQuestions(Long id) {
         Question question = questionRepository.findById(id)
-                                              .orElseThrow(() -> new RuntimeException("Question not found"));
+                .orElseThrow(() -> new RuntimeException("Question not found"));
         return questionRepository.findByCreator_Id(question.getCreator().getId())
-                                 .stream()
-                                 .map(q -> getQuestionDTO(q, null))
-                                 .toList();
+                .stream()
+                .map(q -> getQuestionDTO(q, null))
+                .toList();
+    }
+
+    private boolean filterByAnsweredStatus(Question question, Long userId, AnsweredStatus answeredStatus) {
+        return answeredQuestionUserRepository.findByQuestionIdAndUserId(question.getId(), userId)
+                .map(a -> a.getAnsweredStatus() == answeredStatus)
+                .orElse(false);
     }
 
     private QuestionDTO getQuestionDTO(Question question, Boolean answered) {

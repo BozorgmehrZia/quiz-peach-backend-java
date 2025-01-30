@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import quiz_peach.domain.dto.*;
-import quiz_peach.domain.entities.User;
 import quiz_peach.domain.enumeration.AnsweredStatus;
 import quiz_peach.service.QuestionService;
 
@@ -19,18 +18,21 @@ public class QuestionController {
     private final QuestionService questionService;
 
     @PostMapping
-    public ResponseEntity<Void> createQuestion(@AuthenticationPrincipal User user, @RequestBody @Valid CreateQuestionDTO request) {
+    public ResponseEntity<Void> createQuestion(@AuthenticationPrincipal CurrentUser user,
+                                               @RequestBody @Valid CreateQuestionDTO request) {
         questionService.createQuestion(request, user);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/answer")
-    public ResponseEntity<AnswerQuestionResponseDTO> submitAnswer(@AuthenticationPrincipal User user, @RequestBody AnswerQuestionRequestDTO request) {
+    public ResponseEntity<AnswerQuestionResponseDTO> submitAnswer(@AuthenticationPrincipal CurrentUser user,
+                                                                  @RequestBody AnswerQuestionRequestDTO request) {
         return ResponseEntity.ok(questionService.submitAnswer(request, user));
     }
 
     @GetMapping("/{id}/details")
-    public ResponseEntity<QuestionDTO> getQuestionDetails(@AuthenticationPrincipal User user, @PathVariable Long id) {
+    public ResponseEntity<QuestionDTO> getQuestionDetails(@AuthenticationPrincipal CurrentUser user,
+                                                          @PathVariable Long id) {
         return ResponseEntity.ok(questionService.getQuestionDetails(id, user));
     }
 
@@ -43,7 +45,7 @@ public class QuestionController {
     public ResponseEntity<List<FilteredQuestionDTO>> getFilteredQuestions(@RequestParam(required = false) String name,
                                                                           @RequestParam(required = false) String level,
                                                                           @RequestParam(required = false) AnsweredStatus answeredStatus,
-                                                                          @AuthenticationPrincipal User user) {
+                                                                          @AuthenticationPrincipal CurrentUser user) {
         return ResponseEntity.ok(questionService.getFilteredQuestions(name, level, answeredStatus, user));
     }
 

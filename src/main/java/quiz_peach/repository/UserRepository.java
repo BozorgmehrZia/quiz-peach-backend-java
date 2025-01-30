@@ -6,16 +6,16 @@ import org.springframework.stereotype.Repository;
 import quiz_peach.domain.entities.User;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
     Boolean existsByNameOrEmail(String name, String email);
 
-    User findByEmail(String email);
+    Optional<User> findByEmail(String email);
 
-    @Query("SELECT u FROM User u WHERE (:name IS NULL OR LOWER(u.name) LIKE LOWER(CONCAT('%', :name, '%'))) ORDER BY " +
-           "CASE WHEN :isDesc = true THEN u.score END DESC, " +
-           "CASE WHEN :isDesc = false THEN u.score END ASC")
-    List<User> findByNameContainingIgnoreCaseOrderByScore(String name, boolean isDesc);
-
+    @Query("SELECT u FROM User u WHERE (:name IS NULL OR LOWER(u.name) LIKE LOWER(CONCAT('%', :name, '%'))) AND u.id <> :currentUserId ORDER BY " +
+            "CASE WHEN :isDesc = true THEN u.score END DESC, " +
+            "CASE WHEN :isDesc = false THEN u.score END ASC")
+    List<User> findByNameContainingIgnoreCaseAndIdNotOrderByScore(String name, Long currentUserId, boolean isDesc);
 }
