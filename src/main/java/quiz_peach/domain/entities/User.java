@@ -35,7 +35,7 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AnsweredQuestionUser> answeredQuestions;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_followers",
             joinColumns = @JoinColumn(name = "user_id"),
