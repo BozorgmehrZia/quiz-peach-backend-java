@@ -1,13 +1,16 @@
 server:
-  port: 9090
+  port: 8080
 
 spring:
   datasource:
-    url: jdbc:h2:mem:db;
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/quizpeach}
+    username: ${SPRING_DATASOURCE_USERNAME:quizpeach}
+    password: ${SPRING_DATASOURCE_PASSWORD:quizpeach}
+    driver-class-name: org.postgresql.Driver
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
-    database: H2
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    database: postgresql
     open-in-view: false
     show-sql: true
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: none

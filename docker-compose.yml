@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: postgres-db
+    environment:
+      POSTGRES_DB: quizpeach
+      POSTGRES_USER: quizpeach
+      POSTGRES_PASSWORD: quizpeach
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: ./quiz-peach-backend-java
+      dockerfile: Dockerfile
+    container_name: backend
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/quizpeach
+      SPRING_DATASOURCE_USERNAME: quizpeach
+      SPRING_DATASOURCE_PASSWORD: quizpeach
+    ports:
+      - "8080:8080"
+    restart: always
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./quiz-peach/quiz-peach/
+      dockerfile: Dockerfile
+    container_name: frontend
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+    environment:
+      - REACT_APP_API_URL=http://backend:8080/api
+    restart: always
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
