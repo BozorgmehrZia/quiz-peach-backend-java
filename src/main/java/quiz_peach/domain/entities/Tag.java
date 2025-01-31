@@ -2,10 +2,11 @@ package quiz_peach.domain.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.util.List;
 
 @Entity
-@Table(name = "tag")
+@Table(name = "tb_tag")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,7 +21,7 @@ public class Tag {
     private String name;
 
     @Column(name = "question_number", nullable = false)
-    private Integer questionNumber = 0;
+    private Integer questionNumber;
 
     @OneToMany(mappedBy = "tag", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Question> questions;

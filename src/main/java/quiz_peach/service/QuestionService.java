@@ -8,6 +8,9 @@ import quiz_peach.domain.entities.AnsweredQuestionUser;
 import quiz_peach.domain.entities.Question;
 import quiz_peach.domain.entities.Tag;
 import quiz_peach.domain.enumeration.AnsweredStatus;
+import quiz_peach.domain.enumeration.DifficultyLevel;
+import quiz_peach.exceptions.InputInvalidException;
+import quiz_peach.exceptions.ResourceNotFoundException;
 import quiz_peach.repository.AnsweredQuestionUserRepository;
 import quiz_peach.repository.QuestionRepository;
 import quiz_peach.repository.TagRepository;
@@ -26,7 +29,7 @@ public class QuestionService {
     @Transactional
     public void createQuestion(CreateQuestionDTO dto, CurrentUser user) {
         Tag tag = tagRepository.findByName(dto.tagName())
-                .orElseThrow(() -> new RuntimeException("Tag not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Tag not found"));
 
         Question question = Question.builder()
                 .creator(user.getUser())
@@ -37,7 +40,9 @@ public class QuestionService {
                 .option3(dto.option3())
                 .option4(dto.option4())
                 .correctOption(dto.correctOption())
-                .level(dto.level())
+                .level(DifficultyLevel.getDifficultyLevelById(dto.level()))
+                .answerCount(0)
+                .correctAnswerCount(0)
                 .tag(tag)
                 .build();
 
@@ -51,17 +56,17 @@ public class QuestionService {
         questionRepository.save(question);
     }
 
-    public List<FilteredQuestionDTO> getFilteredQuestions(String name, String level, AnsweredStatus answeredStatus, CurrentUser user) {
+    public List<FilteredQuestionDTO> getFilteredQuestions(String name, DifficultyLevel level, AnsweredStatus answeredStatus, CurrentUser user) {
         List<Question> questions = questionRepository.findByFilters(name, level);
         return questions.stream()
                 .filter(q -> answeredStatus == null || filterByAnsweredStatus(q, user.getUser().getId(), answeredStatus))
-                .map(q -> new FilteredQuestionDTO(q.getId(), q.getName(), q.getLevel(), q.getTag().getName()))
+                .map(q -> new FilteredQuestionDTO(q.getId(), q.getName(), q.getLevel().getId(), q.getTag().getName()))
                 .collect(Collectors.toList());
     }
 
     public QuestionDTO getQuestionDetails(Long id, CurrentUser user) {
         Question question = questionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Question not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Question not found"));
 
         boolean answered = answeredQuestionUserRepository.existsByUserIdAndQuestionId(user.getUser().getId(), id);
 
@@ -71,16 +76,16 @@ public class QuestionService {
     @Transactional
     public AnswerQuestionResponseDTO submitAnswer(AnswerQuestionRequestDTO dto, CurrentUser user) {
         Question question = questionRepository.findById(dto.questionId())
-                .orElseThrow(() -> new RuntimeException("Question not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Question not found"));
 
         if (dto.option() > 4 || dto.option() < 1) {
-            throw new RuntimeException("Option must be an integer between 1 and 4.");
+            throw new InputInvalidException("Option must be an integer between 1 and 4.");
         }
         boolean isCorrect = Objects.equals(question.getCorrectOption(), dto.option());
         AnsweredStatus answeredStatus = isCorrect ? AnsweredStatus.CORRECT : AnsweredStatus.INCORRECT;
 
         if (answeredQuestionUserRepository.existsByUserIdAndQuestionId(user.getUser().getId(), dto.questionId())) {
-            throw new RuntimeException("You have already answered this question.");
+            throw new InputInvalidException("You have already answered this question.");
         }
 
         AnsweredQuestionUser answeredQuestionUser = new AnsweredQuestionUser(question, user.getUser(), answeredStatus);
@@ -96,7 +101,7 @@ public class QuestionService {
 
     public List<QuestionDTO> getSimilarQuestions(Long id) {
         Question question = questionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Question not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Question not found"));
         return questionRepository.findByCreator_Id(question.getCreator().getId())
                 .stream()
                 .map(q -> getQuestionDTO(q, null))
@@ -118,7 +123,7 @@ public class QuestionService {
                 question.getOption2(),
                 question.getOption3(),
                 question.getOption4(),
-                question.getLevel(),
+                question.getLevel().getId(),
                 question.getAnswerCount(),
                 question.getCorrectAnswerCount(),
                 question.getTag().getName(),

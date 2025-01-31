@@ -15,7 +15,7 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
     @Query("SELECT t FROM Tag t WHERE (:name IS NULL OR LOWER(t.name) LIKE LOWER(CONCAT('%', :name, '%'))) ORDER BY " +
            "CASE WHEN :isDesc = true THEN t.questionNumber END DESC, " +
            "CASE WHEN :isDesc = false THEN t.questionNumber END ASC")
-    List<Tag> findByNameContainingIgnoreCaseOrderByQuestionNumber(String name, boolean desc);
+    List<Tag> findByNameContainingIgnoreCaseOrderByQuestionNumber(String name, boolean isDesc);
 
     Boolean existsByName(String name);
 }

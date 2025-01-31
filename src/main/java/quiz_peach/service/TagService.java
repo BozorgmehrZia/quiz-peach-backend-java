@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import quiz_peach.domain.dto.CreateTagRequestDTO;
 import quiz_peach.domain.dto.TagDTO;
 import quiz_peach.domain.entities.Tag;
+import quiz_peach.exceptions.InputInvalidException;
 import quiz_peach.repository.TagRepository;
 
 import java.util.List;
@@ -25,14 +26,14 @@ public class TagService {
     public TagDTO createTag(CreateTagRequestDTO tagRequestDTO) {
         String name = tagRequestDTO.name();
         if (name == null || name.trim().isEmpty()) {
-            throw new RuntimeException("Name is required and must be a string.");
+            throw new InputInvalidException("Name is required and must be a string.");
         }
 
         if (tagRepository.existsByName(name)) {
-            throw new RuntimeException("Tag already exists.");
+            throw new InputInvalidException("Tag already exists.");
         }
 
-        Tag tag = tagRepository.save(Tag.builder().name(name).build());
+        Tag tag = tagRepository.save(Tag.builder().name(name).questionNumber(0).build());
 
         return new TagDTO(tag.getId(), tag.getName(), tag.getQuestionNumber());
     }

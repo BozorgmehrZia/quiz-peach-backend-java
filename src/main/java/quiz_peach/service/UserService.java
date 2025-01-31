@@ -12,11 +12,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import quiz_peach.domain.dto.*;
 import quiz_peach.domain.entities.User;
+import quiz_peach.exceptions.InputInvalidException;
 import quiz_peach.repository.UserRepository;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -50,13 +50,14 @@ public class UserService {
 
     public UserResponseDTO registerUser(UserRequestDTO userRequestDTO) {
         if (userRepository.existsByNameOrEmail(userRequestDTO.name(), userRequestDTO.email())) {
-            throw new RuntimeException("User with this name or email already exists.");
+            throw new InputInvalidException("User with this name or email already exists.");
         }
 
         User user = User.builder()
                         .name(userRequestDTO.name())
                         .email(userRequestDTO.email())
                         .password(passwordEncoder.encode(userRequestDTO.password()))
+                        .score(0)
                         .build();
         User createdUser = userRepository.save(user);
         return new UserResponseDTO(createdUser.getId(), createdUser.getName(), createdUser.getScore(), null);
@@ -65,8 +66,7 @@ public class UserService {
     public LoginResponseDTO loginUser(LoginRequestDTO loginRequestDTO) {
         String email = loginRequestDTO.email();
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-                        "Incorrect email or password"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Incorrect email or password"));
         if (!passwordEncoder.matches(loginRequestDTO.password(), user.getPassword())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Incorrect email or password");
         }
@@ -74,9 +74,9 @@ public class UserService {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(email, loginRequestDTO.password()));
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            return new LoginResponseDTO(user.getName(), "Bearer " + jwtTokenService.generateToken(email));
+            return new LoginResponseDTO(user.getName(), "Bearer %s".formatted(jwtTokenService.generateToken(email)));
         } catch (AuthenticationException e) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Login failed: " + e.getMessage());
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Login failed: %s".formatted(e.getMessage()));
         }
     }
 }

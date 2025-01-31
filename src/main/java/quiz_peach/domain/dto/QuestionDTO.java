@@ -10,7 +10,7 @@ public record QuestionDTO(
         String option2,
         String option3,
         String option4,
-        DifficultyLevel level,
+        Integer level,
         Integer answerCount,
         Integer correctAnswerCount,
         String tagName,

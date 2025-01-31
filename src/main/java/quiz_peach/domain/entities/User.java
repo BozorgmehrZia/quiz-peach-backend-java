@@ -1,12 +1,12 @@
 package quiz_peach.domain.entities;
 
-import jakarta.persistence.*; // Use javax.persistence.* if using an older version of Spring
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.List;
 
 @Entity
-@Table(name = "user")
+@Table(name = "tb_user")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -27,7 +27,7 @@ public class User {
     private String password;
 
     @Column(nullable = false)
-    private Integer score = 0;
+    private Integer score;
 
     @OneToMany(mappedBy = "creator", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Question> questions;

@@ -7,6 +7,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import quiz_peach.domain.dto.*;
 import quiz_peach.domain.enumeration.AnsweredStatus;
+import quiz_peach.domain.enumeration.DifficultyLevel;
 import quiz_peach.service.QuestionService;
 
 import java.util.List;
@@ -43,7 +44,7 @@ public class QuestionController {
 
     @GetMapping
     public ResponseEntity<List<FilteredQuestionDTO>> getFilteredQuestions(@RequestParam(required = false) String name,
-                                                                          @RequestParam(required = false) String level,
+                                                                          @RequestParam(required = false) DifficultyLevel level,
                                                                           @RequestParam(required = false) AnsweredStatus answeredStatus,
                                                                           @AuthenticationPrincipal CurrentUser user) {
         return ResponseEntity.ok(questionService.getFilteredQuestions(name, level, answeredStatus, user));

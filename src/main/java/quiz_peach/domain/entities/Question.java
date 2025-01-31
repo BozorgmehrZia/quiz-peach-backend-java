@@ -7,7 +7,7 @@ import quiz_peach.domain.enumeration.DifficultyLevel;
 import java.util.List;
 
 @Entity
-@Table(name = "question")
+@Table(name = "tb_question")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -45,13 +45,13 @@ public class Question {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private DifficultyLevel level = DifficultyLevel.EASY;
+    private DifficultyLevel level;
 
     @Column(name = "answer_count", nullable = false)
-    private Integer answerCount = 0;
+    private Integer answerCount;
 
     @Column(name = "correct_answer_count", nullable = false)
-    private Integer correctAnswerCount = 0;
+    private Integer correctAnswerCount;
 
     @ManyToOne
     @JoinColumn(name = "tag_id", nullable = false)
@@ -62,7 +62,7 @@ public class Question {
 
     @ManyToMany
     @JoinTable(
-            name = "related_questions",
+            name = "tb_related_questions",
             joinColumns = @JoinColumn(name = "question_id"),
             inverseJoinColumns = @JoinColumn(name = "related_id")
     )

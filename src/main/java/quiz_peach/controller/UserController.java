@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import quiz_peach.domain.dto.*;
 import quiz_peach.service.UserService;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @RestController
@@ -25,26 +27,25 @@ public class UserController {
         return ResponseEntity.ok(userService.getUsers(name, sort, user));
     }
 
-    @PostMapping
+    @PostMapping("/register")
     public ResponseEntity<UserResponseDTO> registerUser(@RequestBody @Valid UserRequestDTO userRequestDTO) {
         return ResponseEntity.ok(userService.registerUser(userRequestDTO));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Void> loginUser(@RequestBody LoginRequestDTO loginRequestDTO) {
+    public ResponseEntity<LoginResponseDTO> loginUser(@RequestBody LoginRequestDTO loginRequestDTO) {
         LoginResponseDTO loginResponseDTO = userService.loginUser(loginRequestDTO);
-        String cookie = "username=%s; HttpOnly=false; Secure=false; SameSite=Lax;".formatted(loginResponseDTO.name());
+        String username = URLEncoder.encode(loginResponseDTO.name(), StandardCharsets.UTF_8);
+        String cookie = "username=%s; Http-Only=false; Secure=false; Same-Site=Lax;".formatted(username);
         return ResponseEntity.ok()
-                .header(HttpHeaders.AUTHORIZATION, loginResponseDTO.token())
-                .header(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.AUTHORIZATION)
                 .header(HttpHeaders.SET_COOKIE, cookie)
-                .build();
+                .body(loginResponseDTO);
     }
 
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletRequest request) {
         request.getSession().invalidate();
-        String cookie = "username=; HttpOnly=false; Secure=false; SameSite=Lax;";
+        String cookie = "username=; Http-Only=false; Secure=false; Same-Site=Lax; Max-Age=0";
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie).body("Logout successful");
     }
 

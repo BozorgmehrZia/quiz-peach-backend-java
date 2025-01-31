@@ -16,7 +16,6 @@ import quiz_peach.service.JwtTokenService;
 import quiz_peach.service.SecurityService;
 
 import java.io.IOException;
-import java.util.Collections;
 
 @Component
 @RequiredArgsConstructor

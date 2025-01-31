@@ -5,7 +5,7 @@ import lombok.*;
 import quiz_peach.domain.enumeration.AnsweredStatus;
 
 @Entity
-@Table(name = "answered_question_user")
+@Table(name = "tb_answered_question_user")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
