@@ -49,4 +49,10 @@ public class UserController {
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie).body("Logout successful");
     }
 
+    @PostMapping("/follow/{username}")
+    public ResponseEntity<String> followUser(@PathVariable String username,
+                                             @AuthenticationPrincipal CurrentUser user) {
+        userService.followUser(username, user);
+        return ResponseEntity.ok("Successfully followed " + username);
+    }
 }

@@ -35,6 +35,14 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AnsweredQuestionUser> answeredQuestions;
 
+    @ManyToMany
+    @JoinTable(
+            name = "user_followers",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "followed_user_id")
+    )
+    private List<User> followedUsers;
+
     public void incrementScore() {
         this.score++;
     }

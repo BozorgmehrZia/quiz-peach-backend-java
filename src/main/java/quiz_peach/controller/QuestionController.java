@@ -50,4 +50,10 @@ public class QuestionController {
         return ResponseEntity.ok(questionService.getFilteredQuestions(name, level, answeredStatus, user));
     }
 
+    @GetMapping("/followed/questions")
+    public ResponseEntity<List<QuestionDTO>> getFollowedUsersQuestions(
+            @AuthenticationPrincipal CurrentUser user) {
+        return ResponseEntity.ok(questionService.getFollowedUsersQuestions(user));
+    }
+
 }

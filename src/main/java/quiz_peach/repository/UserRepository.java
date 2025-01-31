@@ -18,4 +18,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "CASE WHEN :isDesc = true THEN u.score END DESC, " +
             "CASE WHEN :isDesc = false THEN u.score END ASC")
     List<User> findByNameContainingIgnoreCaseAndIdNotOrderByScore(String name, Long currentUserId, boolean isDesc);
+
+    @Query("SELECT u FROM User u WHERE u.name = :name")
+    Optional<User> findByName(String name);
+
+    @Query("SELECT u FROM User u JOIN u.followedUsers f WHERE f.id = :userId")
+    List<User> findFollowedUsers(Long userId);
 }

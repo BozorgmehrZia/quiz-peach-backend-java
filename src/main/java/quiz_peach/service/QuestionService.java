@@ -114,6 +114,16 @@ public class QuestionService {
                 .toList();
     }
 
+    public List<QuestionDTO> getFollowedUsersQuestions(CurrentUser user) {
+        List<User> followedUsers = userRepository.findFollowedUsers(user.getUser().getId());
+        List<Question> questions = followedUsers.stream()
+                .flatMap(followedUser -> questionRepository.findByCreator_Id(followedUser.getId()).stream())
+                .toList();
+        return questions.stream()
+                .map(q -> getQuestionDTO(q, null)) // Assuming 'answered' is not relevant here
+                .toList();
+    }
+
     private boolean filterByAnsweredStatus(Question question, Long userId, AnsweredStatus answeredStatus) {
         return answeredQuestionUserRepository.findByQuestionIdAndUserId(question.getId(), userId)
                 .map(a -> a.getAnsweredStatus() == answeredStatus)

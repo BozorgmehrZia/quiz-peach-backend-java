@@ -79,4 +79,18 @@ public class UserService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Login failed: %s".formatted(e.getMessage()));
         }
     }
+
+    public void followUser(String username, CurrentUser currentUser) {
+        User userToFollow = userRepository.findByName(username)
+                .orElseThrow(() -> new InputInvalidException("User not found"));
+
+        User currentUserEntity = currentUser.getUser();
+
+        if (currentUserEntity.getFollowedUsers().contains(userToFollow)) {
+            throw new InputInvalidException("You are already following this user.");
+        }
+
+        currentUserEntity.getFollowedUsers().add(userToFollow);
+        userRepository.save(currentUserEntity);
+    }
 }

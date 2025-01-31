@@ -1,7 +1,5 @@
 package quiz_peach.domain.dto;
 
-import quiz_peach.domain.enumeration.DifficultyLevel;
-
 public record QuestionDTO(
         Long id,
         String name,
