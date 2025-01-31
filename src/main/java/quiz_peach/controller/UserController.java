@@ -36,7 +36,7 @@ public class UserController {
     public ResponseEntity<LoginResponseDTO> loginUser(@RequestBody LoginRequestDTO loginRequestDTO) {
         LoginResponseDTO loginResponseDTO = userService.loginUser(loginRequestDTO);
         String username = URLEncoder.encode(loginResponseDTO.name(), StandardCharsets.UTF_8);
-        String cookie = "username=%s; Http-Only=false; Secure=false; Same-Site=Lax;".formatted(username);
+        String cookie = "username=%s; Path=/; Http-Only=false; Secure=false; SameSite=Lax;".formatted(username);
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie)
                 .body(loginResponseDTO);
@@ -45,7 +45,7 @@ public class UserController {
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletRequest request) {
         request.getSession().invalidate();
-        String cookie = "username=; Http-Only=false; Secure=false; Same-Site=Lax; Max-Age=0";
+        String cookie = "username=; Path=/; Http-Only=false; Secure=false; SameSite=Lax; Max-Age=0";
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie).body("Logout successful");
     }
 

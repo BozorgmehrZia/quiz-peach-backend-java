@@ -7,6 +7,7 @@ import quiz_peach.domain.dto.*;
 import quiz_peach.domain.entities.AnsweredQuestionUser;
 import quiz_peach.domain.entities.Question;
 import quiz_peach.domain.entities.Tag;
+import quiz_peach.domain.entities.User;
 import quiz_peach.domain.enumeration.AnsweredStatus;
 import quiz_peach.domain.enumeration.DifficultyLevel;
 import quiz_peach.exceptions.InputInvalidException;
@@ -14,6 +15,7 @@ import quiz_peach.exceptions.ResourceNotFoundException;
 import quiz_peach.repository.AnsweredQuestionUserRepository;
 import quiz_peach.repository.QuestionRepository;
 import quiz_peach.repository.TagRepository;
+import quiz_peach.repository.UserRepository;
 
 import java.util.List;
 import java.util.Objects;
@@ -25,6 +27,7 @@ public class QuestionService {
     private final QuestionRepository questionRepository;
     private final TagRepository tagRepository;
     private final AnsweredQuestionUserRepository answeredQuestionUserRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     public void createQuestion(CreateQuestionDTO dto, CurrentUser user) {
@@ -84,15 +87,18 @@ public class QuestionService {
         boolean isCorrect = Objects.equals(question.getCorrectOption(), dto.option());
         AnsweredStatus answeredStatus = isCorrect ? AnsweredStatus.CORRECT : AnsweredStatus.INCORRECT;
 
-        if (answeredQuestionUserRepository.existsByUserIdAndQuestionId(user.getUser().getId(), dto.questionId())) {
+        User currentUser = user.getUser();
+        if (answeredQuestionUserRepository.existsByUserIdAndQuestionId(currentUser.getId(), dto.questionId())) {
             throw new InputInvalidException("You have already answered this question.");
         }
 
-        AnsweredQuestionUser answeredQuestionUser = new AnsweredQuestionUser(question, user.getUser(), answeredStatus);
+        AnsweredQuestionUser answeredQuestionUser = new AnsweredQuestionUser(question, currentUser, answeredStatus);
         answeredQuestionUserRepository.save(answeredQuestionUser);
 
         if (isCorrect) {
             question.incrementCorrectAnswerCount();
+            currentUser.incrementScore();
+            userRepository.save(currentUser);
         }
         question.incrementAnswerCount();
 
