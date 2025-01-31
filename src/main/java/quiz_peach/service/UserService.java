@@ -17,6 +17,7 @@ import quiz_peach.repository.UserRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -106,5 +107,13 @@ public class UserService {
 
         currentUserEntity.getFollowedUsers().remove(userToUnfollow);
         userRepository.save(currentUserEntity);
+    }
+
+    public List<String> getFollowedUsers(CurrentUser currentUser) {
+        User currentUserEntity = currentUser.getUser();
+
+        return currentUserEntity.getFollowedUsers().stream()
+                .map(User::getName)
+                .collect(Collectors.toList());
     }
 }

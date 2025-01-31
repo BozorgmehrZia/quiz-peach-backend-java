@@ -62,4 +62,10 @@ public class UserController {
         userService.unfollowUser(username, user);
         return ResponseEntity.ok("Successfully unfollowed " + username);
     }
+
+    @GetMapping("/followed")
+    public ResponseEntity<List<String>> getFollowedUsers(@AuthenticationPrincipal CurrentUser user) {
+        List<String> followedUsernames = userService.getFollowedUsers(user);
+        return ResponseEntity.ok(followedUsernames);
+    }
 }
