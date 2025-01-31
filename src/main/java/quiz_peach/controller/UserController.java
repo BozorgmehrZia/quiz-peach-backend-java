@@ -55,4 +55,11 @@ public class UserController {
         userService.followUser(username, user);
         return ResponseEntity.ok("Successfully followed " + username);
     }
+
+    @PostMapping("/unfollow/{username}")
+    public ResponseEntity<String> unfollowUser(@PathVariable String username,
+                                               @AuthenticationPrincipal CurrentUser user) {
+        userService.unfollowUser(username, user);
+        return ResponseEntity.ok("Successfully unfollowed " + username);
+    }
 }

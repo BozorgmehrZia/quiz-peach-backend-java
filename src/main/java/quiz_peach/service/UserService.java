@@ -93,4 +93,18 @@ public class UserService {
         currentUserEntity.getFollowedUsers().add(userToFollow);
         userRepository.save(currentUserEntity);
     }
+
+    public void unfollowUser(String username, CurrentUser currentUser) {
+        User userToUnfollow = userRepository.findByName(username)
+                .orElseThrow(() -> new InputInvalidException("User not found"));
+
+        User currentUserEntity = currentUser.getUser();
+
+        if (!currentUserEntity.getFollowedUsers().contains(userToUnfollow)) {
+            throw new InputInvalidException("You are not following this user.");
+        }
+
+        currentUserEntity.getFollowedUsers().remove(userToUnfollow);
+        userRepository.save(currentUserEntity);
+    }
 }
